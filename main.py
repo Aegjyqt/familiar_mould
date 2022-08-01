@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 import os
 
 import nav_constants
-import randomizer
-from randomizer import Randomizer
+from randomizer import Randomizer, wise_list
 
 import keyboards
 import messages
@@ -15,18 +14,19 @@ dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=['start'])
-async def welcome(message: types.Message):
+async def welcome(message: types.Message) -> None:
     await message.answer(messages.welcome, reply_markup=keyboards.menu_keyboard)
 
 
 @dp.message_handler(commands=['about'])
-async def about(message: types.Message):
+async def about(message: types.Message) -> None:
     await message.answer(messages.about)
 
 
-@dp.message_handler(text=nav_constants.random_str)  # у меня на записи не видно подробностей (как перегнать в text=Text)
+@dp.message_handler(text=nav_constants.random_str)
 async def menu_keyboard_reaction(message: types.Message) -> None:
-    await message.answer(Randomizer(randomizer.wise_list).randomize(randomizer.wise_list))
+    await message.answer(Randomizer(wise_list).randomize(wise_list))
 
 
-executor.start_polling(dp)
+if __name__ == "__main__":
+    executor.start_polling(dp)

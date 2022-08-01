@@ -1,7 +1,7 @@
 from random import choice
 
 
-class Randomizer:  # а вообще нужен класс? Можно было обойтись функцией?
+class Randomizer:
     """Feeds a random line from a specific list with a reduced chance of the same line repeating two times in a row"""
     _used_phrases = []
 
