@@ -1,0 +1,6 @@
+random_str = "get random str"
+essential_data = "get essential data"
+request_support = "request support"
+questboard = "questboard"
+reminder = "reminder"
+settings = "settings"

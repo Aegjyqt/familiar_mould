@@ -1,14 +1,28 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
-
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+import nav_constants
 # целесообразно ли создать класс Keyboard для генерации keyboards по заданным параметрам?
 
-button1 = InlineKeyboardButton(text='get random str')
-button2 = InlineKeyboardButton(text='get essential data')
-button3 = InlineKeyboardButton(text='request support')
-button4 = InlineKeyboardButton(text='questboard')
-button5 = InlineKeyboardButton(text='reminder')
-button6 = InlineKeyboardButton(text='settings')
+button1 = KeyboardButton(text=nav_constants.random_str)
+button2 = KeyboardButton(text=nav_constants.essential_data)
+button3 = KeyboardButton(text=nav_constants.request_support)
+button4 = KeyboardButton(text=nav_constants.questboard)
+button5 = KeyboardButton(text=nav_constants.reminder)
+button6 = KeyboardButton(text=nav_constants.settings)
 
-menu_keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True, row_width=2).\
-                                    add(button1, button2, button3, button4, button5, button6)
-
+menu_keyboard = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text=nav_constants.random_str),
+            KeyboardButton(text=nav_constants.essential_data)
+        ],
+        [
+            KeyboardButton(text=nav_constants.request_support),
+            KeyboardButton(text=nav_constants.questboard)
+        ],
+        [
+            KeyboardButton(text=nav_constants.reminder),
+            KeyboardButton(text=nav_constants.settings)
+        ]
+    ],
+    resize_keyboard=True
+    )
