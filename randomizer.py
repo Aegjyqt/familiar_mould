@@ -3,10 +3,11 @@ from random import choice
 
 class Randomizer:  # а вообще нужен класс? Можно было обойтись функцией?
     """Feeds a random line from a specific list with a reduced chance of the same line repeating two times in a row"""
-    _used_phrases = []
 
-    def __init__(self, list_of_elements: list):
-        self.list_of_elements = list_of_elements
+    def __init__(self):
+        pass
+
+    _used_phrases = []
 
     def randomize(self, phrases: list) -> str:  # может, отослать к self.list_of_elements?
         if phrases:
