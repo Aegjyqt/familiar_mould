@@ -15,7 +15,8 @@ dp = Dispatcher(bot)
 
 @dp.message_handler(commands=['start'])
 async def welcome(message: types.Message) -> None:
-    await message.answer(messages.welcome, reply_markup=keyboards.menu_keyboard)
+    text = f'Hi {message.from_user.first_name}, {messages.welcome}'  # разумно писать этот код здесь? или в messages?
+    await message.answer(text, reply_markup=keyboards.menu_keyboard)
 
 
 @dp.message_handler(commands=['about'])
