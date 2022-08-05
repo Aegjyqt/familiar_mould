@@ -28,5 +28,6 @@ wise_list = [
     'In your case: do more, think less about HOW to do it',
     'Deceit. Self-deceit. Miscommunication. These are the roots of many evils',
     'Do not despair. Do not presume.',
-    'Do what you must, and come what may'
+    'Do what you must, and come what may',
+    'Now that you don\'t have to be perfect, you can be good.'
 ]
