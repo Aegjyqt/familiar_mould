@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 
 import nav_constants
+from decorator import admin
 from randomizer import Randomizer, wise_list
 import keyboards
 import messages
@@ -19,37 +20,75 @@ bot = Bot(
 dp = Dispatcher(bot=bot, storage=MemoryStorage())
 
 
-class StoryPipeline(StatesGroup):
-    next_step = State()
+class Form(StatesGroup):
+    name = State()
+    surname = State()
+    photo = State()
+    age = State()
 
 
 @dp.message_handler(commands=['start'])
 async def welcome(message: types.Message) -> None:
+    await message.answer("Хендлер сработал")
     await message.answer(messages.welcome, reply_markup=keyboards.menu_keyboard)
 
 
 @dp.message_handler(commands=['about'])
 async def about(message: types.Message) -> None:
-    await message.answer(f"Пайплайн начался!\n\n{messages.first_item}", reply_markup=keyboards.next_step_keyboard)
-    await StoryPipeline.next_step.set()
+    await message.answer(f"", reply_markup=keyboards.next_step_keyboard)
 
 
-@dp.callback_query_handler(text="next_step_button", state=StoryPipeline.next_step)
-async def send_text(call: types.CallbackQuery, state: FSMContext):
+@dp.message_handler(commands=['form'])
+async def start_form(message: types.Message) -> None:
+    await message.answer("<b>Начало анкеты.</b>\n\nВведи свое имя:")
+    await Form.name.set()
+
+
+@dp.message_handler(state=Form.name)
+async def handle_entered_name(message: types.Message, state: FSMContext) -> None:
     async with state.proxy() as data:
-        try:
-            pipeline_index = data['iterator']
-        except KeyError:
-            data['iterator'] = 0
-            pipeline_index = data['iterator']
+        data['name'] = message.text
+    await message.answer("Отлично. Теперь введи фамилию:")
+    await state.set_state(Form.surname)
 
-        try:
-            await call.message.edit_text(messages.about[pipeline_index], reply_markup=keyboards.next_step_keyboard)
-            data['iterator'] = pipeline_index + 1
-        except IndexError:
-            await call.message.delete_reply_markup()
-            await call.message.answer("Пайплайн пройден!")
-            await state.finish()
+
+@dp.message_handler(state=Form.surname)
+async def handle_entered_surname(message: types.Message, state: FSMContext) -> None:
+    async with state.proxy() as data:
+        data['surname'] = message.text
+
+    await message.answer("Отлично. Теперь введи свой возраст:")
+    await state.set_state(Form.age)
+
+
+@dp.message_handler(state=Form.age)
+async def handle_entered_age(message: types.Message, state: FSMContext) -> None:
+    entered_age = message.text
+    try:
+        entered_age = int(entered_age)
+    except ValueError:
+        await message.reply("Ввод некорректен. Еще раз введи свой возраст")
+        return
+
+    async with state.proxy() as data:
+        data['age'] = entered_age
+
+    await message.answer("Отлично. Теперь пришли свою фотографию:")
+    await state.set_state(Form.photo)
+
+
+@dp.message_handler(state=Form.photo, content_types=['photo'])
+async def handle_sent_photo(message: types.Message, state: FSMContext) -> None:
+    async with state.proxy() as data:
+        sent_photo_id = message.photo[-1].file_id
+        user_name = data['name']
+        user_surname = data['surname']
+        user_age = data['age']
+        await message.answer_photo(
+            photo=sent_photo_id,
+            caption=f"Имя: {user_name}\nФамилия: {user_surname}\nВозраст: {user_age}")
+
+    await state.finish()
 
 
 @dp.message_handler(text=nav_constants.random_str)
