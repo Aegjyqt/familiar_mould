@@ -2,11 +2,11 @@ from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import InputFile
 from dotenv import load_dotenv
 import os
 
 import nav_constants
-from decorator import admin
 from randomizer import Randomizer, wise_list
 import keyboards
 import messages
@@ -20,7 +20,7 @@ bot = Bot(
 dp = Dispatcher(bot=bot, storage=MemoryStorage())
 
 
-class Form(StatesGroup):
+class Profile(StatesGroup):
     name = State()
     surname = State()
     photo = State()
@@ -41,27 +41,30 @@ async def about(message: types.Message) -> None:
 @dp.message_handler(commands=['form'])
 async def start_form(message: types.Message) -> None:
     await message.answer("<b>Начало анкеты.</b>\n\nВведи свое имя:")
-    await Form.name.set()
+    await Profile.name.set()
 
 
-@dp.message_handler(state=Form.name)
+@dp.message_handler(state=Profile.name)
 async def handle_entered_name(message: types.Message, state: FSMContext) -> None:
     async with state.proxy() as data:
         data['name'] = message.text
-    await message.answer("Отлично. Теперь введи фамилию:")
-    await state.set_state(Form.surname)
+        msg_id = (await message.answer_photo(photo=InputFile("person_avatar.webp"),
+                                             caption=messages.get_caption(name=message.text))).message_id
+        data['msg_id'] = msg_id
+    await state.set_state(Profile.surname)
 
 
-@dp.message_handler(state=Form.surname)
+@dp.message_handler(state=Profile.surname)
 async def handle_entered_surname(message: types.Message, state: FSMContext) -> None:
     async with state.proxy() as data:
         data['surname'] = message.text
+        await message.bot.edit_message_caption(chat_id=message.from_user.id,
+                                               message_id=data['msg_id'],
+                                               caption=messages.get_caption(name=data['name'], surname=data['surname']))
+    await state.set_state(Profile.age)
 
-    await message.answer("Отлично. Теперь введи свой возраст:")
-    await state.set_state(Form.age)
 
-
-@dp.message_handler(state=Form.age)
+@dp.message_handler(state=Profile.age)
 async def handle_entered_age(message: types.Message, state: FSMContext) -> None:
     entered_age = message.text
     try:
@@ -74,10 +77,10 @@ async def handle_entered_age(message: types.Message, state: FSMContext) -> None:
         data['age'] = entered_age
 
     await message.answer("Отлично. Теперь пришли свою фотографию:")
-    await state.set_state(Form.photo)
+    await state.set_state(Profile.photo)
 
 
-@dp.message_handler(state=Form.photo, content_types=['photo'])
+@dp.message_handler(state=Profile.photo, content_types=['photo'])
 async def handle_sent_photo(message: types.Message, state: FSMContext) -> None:
     async with state.proxy() as data:
         sent_photo_id = message.photo[-1].file_id
