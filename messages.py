@@ -1,10 +1,10 @@
-welcome = 'this is a welcome message'
+welcome = "this is a welcome message"
 
-first_item = 'Here will be the bot description'
+about_openline = 'about message start'
 
 
 # Превратить эту штуку в генератор, каждый последующий раз выдавать следующий блок текста
-about = ['Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem'
+about_list = ['Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem'
          ' aperiam eaque ipsa, quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt, '
          'explicabo. Nemo enim ipsam voluptatem, quia voluptas sit, aspernatur aut odit aut fugit, sed quia '
          'consequuntur magni dolores eos, qui ratione voluptatem sequi nesciunt, neque porro quisquam est, ',
@@ -21,3 +21,15 @@ about = ['Sed ut perspiciatis, unde omnis iste natus error sit voluptatem accusa
          'et aut officiis debitis aut rerum necessitatibus saepe eveniet, ut et voluptates repudiandae sint et '
          'molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis ',
          'voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.']
+
+
+def gen_list(text_as_list):
+    for element in text_as_list:
+        yield element
+
+
+about_as_gen = gen_list(about_list)
+
+
+def get_caption(name: str = "", age: int = None) -> str:
+    return f"Your name:\n{'Unknown' if not name else name}\nYour age:\n{'Unknown' if not age else age}"
