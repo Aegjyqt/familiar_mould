@@ -108,13 +108,18 @@ async def name_state_process(message: types.Message, state: FSMContext) -> None:
 
 @dp.message_handler(state=ProfilePipeline.age_state)
 async def age_state_process(message: types.Message, state: FSMContext) -> None:
-    entered_age = message.text
-    try:
-        entered_age = int(entered_age)
-    except ValueError:
-        await message.reply("Incorrect input. Enter your age")
-        return
     async with state.proxy() as data:
+        entered_age = message.text
+        except_messages_ids_list = []
+        try:
+            entered_age = int(entered_age)
+        except ValueError:
+            incorrect_input_id = message.message_id
+            except_messages_ids_list.append(incorrect_input_id)
+            except_message_id = (await message.reply("Incorrect input. Enter your age")).message_id
+            except_messages_ids_list.append(except_message_id)
+            data['except_messages_ids_list'] = except_messages_ids_list
+            return
         await bot.delete_message(message_id=data['profile_name_msg_id'], chat_id=message.from_user.id)
         await bot.delete_message(message_id=message.message_id, chat_id=message.chat.id)
         data['age'] = message.text
@@ -131,6 +136,9 @@ async def photo_state_process(message: types.Message, state: FSMContext) -> None
     async with state.proxy() as data:
         await bot.delete_message(message_id=data['profile_age_msg_id'], chat_id=message.from_user.id)
         await bot.delete_message(message_id=message.message_id, chat_id=message.chat.id)
+        if data['except_messages_ids_list']:
+            for element in data['except_messages_ids_list']:
+                await bot.delete_message(message_id=element, chat_id=message.from_user.id)
         sent_photo_id = message.photo[-1].file_id
         await message.bot.edit_message_media(chat_id=message.chat.id,
                                              message_id=data['profile_init_msg_id'],
